@@ -20,7 +20,8 @@ export default async function AdminDashboard() {
     <div>
       <h1 className="font-display text-2xl sm:text-3xl font-semibold mb-6">Dashboard</h1>
 
-      <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+      {/* Tampilan HP paksa grid-cols-2 (1 baris 2 kotak) */}
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4 mb-8">
         <Stat label="Total Produk" value={total} />
         <Stat label="Produk Aktif" value={active} />
         <Stat label="Sedang Diskon" value={discounted} />
@@ -72,9 +73,9 @@ export default async function AdminDashboard() {
 
 function Stat({ label, value, href }) {
   const content = (
-    <div className="bg-white border border-[var(--line)] rounded-sm p-5 h-full">
-      <p className="text-xs text-ink/50">{label}</p>
-      <p className="font-display text-3xl mt-1">{value}</p>
+    <div className="bg-white border border-[var(--line)] rounded-sm p-3.5 sm:p-5 h-full">
+      <p className="text-xs text-ink/50 leading-tight">{label}</p>
+      <p className="font-display text-2xl sm:text-3xl mt-1.5">{value}</p>
     </div>
   );
   return href ? <a href={href}>{content}</a> : content;

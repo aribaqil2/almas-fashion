@@ -2,8 +2,7 @@ import "./globals.css";
 import { createClient } from "@/lib/supabase/server";
 import { CartProvider } from "@/components/CartContext";
 import CartDrawer from "@/components/CartDrawer";
-import SiteHeader from "@/components/SiteHeader";
-import SiteFooter from "@/components/SiteFooter";
+import StoreLayoutWrapper from "@/components/StoreLayoutWrapper";
 
 export const metadata = {
   title: "Almas Fashion — Blouse Batik Wanita",
@@ -30,9 +29,10 @@ export default async function RootLayout({ children }) {
       </head>
       <body className="font-sans text-ink bg-paper antialiased">
         <CartProvider>
-          <SiteHeader categories={categories || []} settings={settings} />
-          {children}
-          <SiteFooter settings={settings} />
+          {/* Mengganti SiteHeader & SiteFooter langsung dengan StoreLayoutWrapper */}
+          <StoreLayoutWrapper categories={categories || []} settings={settings}>
+            {children}
+          </StoreLayoutWrapper>
           <CartDrawer />
         </CartProvider>
       </body>

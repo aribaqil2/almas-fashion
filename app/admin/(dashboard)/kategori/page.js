@@ -7,6 +7,7 @@ export default async function KategoriPage({ searchParams }) {
   const { data: categories } = await supabase.from("categories").select("*").order("name");
   const { data: products } = await supabase.from("products").select("category_id");
 
+  const list = categories || [];
   const countFor = (id) => (products || []).filter((p) => p.category_id === id).length;
 
   return (
@@ -20,15 +21,44 @@ export default async function KategoriPage({ searchParams }) {
         <p className="text-sm text-green-700 bg-green-50 border border-green-200 rounded-sm px-3 py-2 mb-5">{searchParams.success}</p>
       )}
 
-      <form action={createCategory} className="flex flex-wrap items-end gap-3 mb-6 bg-white border border-[var(--line)] rounded-sm p-5">
-        <div className="field flex-1 min-w-[200px]">
+      {/* Form Tambah Kategori Baru */}
+      <form action={createCategory} className="flex flex-col sm:flex-row items-stretch sm:items-end gap-3 mb-6 bg-white border border-[var(--line)] rounded-sm p-4 sm:p-5">
+        <div className="field flex-1">
           <label>Nama kategori baru</label>
           <input name="name" type="text" placeholder="mis. Loungewear" required />
         </div>
-        <button type="submit" className="bg-plum text-white text-sm font-medium px-4 py-2.5 rounded-sm">+ Tambah Kategori</button>
+        <button type="submit" className="bg-plum text-white text-sm font-medium px-4 py-2.5 rounded-sm self-end w-full sm:w-auto">+ Tambah Kategori</button>
       </form>
 
-      <div className="bg-white border border-[var(--line)] rounded-sm overflow-x-auto">
+      {/* 1. TAMPILAN MOBILE: KARTU */}
+      <div className="grid grid-cols-1 gap-3 md:hidden">
+        {list.map((c) => (
+          <div key={c.id} className="bg-white border border-[var(--line)] rounded-sm p-4 flex flex-col gap-3">
+            <form action={renameCategory} className="flex items-center gap-2">
+              <input type="hidden" name="id" value={c.id} />
+              <input name="name" defaultValue={c.name} className="border border-[var(--line)] rounded-sm px-3 py-1.5 text-sm flex-1" />
+              <button type="submit" className="text-xs bg-plum text-white px-3 py-1.5 rounded-sm">Simpan</button>
+            </form>
+
+            <div className="flex items-center justify-between pt-2 border-t border-[var(--line)] text-xs text-ink/50">
+              <span>Slug: <strong className="text-ink">{c.slug}</strong></span>
+              <span>Produk: <strong className="text-ink">{countFor(c.id)}</strong></span>
+            </div>
+
+            <div className="text-right pt-1">
+              <form action={deleteCategory}>
+                <input type="hidden" name="id" value={c.id} />
+                <ConfirmSubmitButton message={`Hapus kategori "${c.name}"?`} className="text-xs underline text-red-700 font-medium">
+                  Hapus Kategori
+                </ConfirmSubmitButton>
+              </form>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* 2. TAMPILAN DESKTOP: TABEL */}
+      <div className="hidden md:block bg-white border border-[var(--line)] rounded-sm overflow-x-auto">
         <table className="admin-table w-full text-sm">
           <thead>
             <tr className="text-left text-xs uppercase tracking-wide text-ink/50">
@@ -39,7 +69,7 @@ export default async function KategoriPage({ searchParams }) {
             </tr>
           </thead>
           <tbody>
-            {(categories || []).map((c) => (
+            {list.map((c) => (
               <tr key={c.id}>
                 <td className="py-2.5 px-4">
                   <form action={renameCategory} className="flex items-center gap-2">

@@ -235,8 +235,9 @@ body{ background: var(--paper); color: var(--ink); }
 .overlay.show{ opacity:1; pointer-events:auto; }
 
 :focus-visible{ outline:2px solid var(--plum); outline-offset:2px; }
-
-/* admin dashboard */
+/* =========================================================
+   ADMIN DASHBOARD & SHELL (UPDATED FOR RESPONSIVE SIDEBAR)
+   ========================================================= */
 .badge{ display:inline-flex; align-items:center; padding:.2rem .55rem; border-radius:999px; font-size:.7rem; font-weight:600; white-space:nowrap; }
 .badge-active{ background:rgba(63,125,82,.12); color:#3f7d52; }
 .badge-draft{ background:rgba(43,38,34,.09); color:rgba(43,38,34,.55); }
@@ -248,37 +249,38 @@ body{ background: var(--paper); color: var(--ink); }
 .field input, .field select{ width:100%; border:1px solid var(--line); border-radius:.25rem; padding:.55rem .7rem; font-size:.875rem; background:#fff; }
 .field textarea{ width:100%; border:1px solid var(--line); border-radius:.25rem; padding:.55rem .7rem; font-size:.875rem; background:#fff; resize:vertical; }
 
-/* Admin shell: presentation only; routes, actions, and data remain unchanged. */
+/* Admin Layout Base */
 .admin-shell{ background:var(--cream); }
+
 .admin-sidebar {
-  position: fixed;
-  inset: 0 auto 0 0;
-  width: 250px;
-  min-height: 100vh;
-  z-index: 40;
-  background: #95b4a4; /* <-- Ubah dari var(--ink) ke #95b4a4 */
-  padding: 1.875rem 1.25rem;
+  background: #95b4a4;
   overflow-y: auto;
 }
+
 .admin-logo{ color:#fff; border-bottom:2px solid rgba(184,134,11,.2); padding:0 .25rem 1.25rem; letter-spacing:-.02em; }
 .admin-logo span{ color:var(--gold); }
+
 .admin-menu-label { 
-  color: rgba(43, 38, 34, 0.6); /* Warna teks gelap transparan */
+  color: rgba(43, 38, 34, 0.6); 
   font-size: .6875rem; 
   font-weight: 700; 
   letter-spacing: .1em; 
   text-transform: uppercase; 
   margin: 1.25rem .25rem .625rem; 
 }
+
 .admin-nav-item { 
   display: flex; 
   align-items: center; 
   gap: .875rem; 
   width: 100%; 
   margin-bottom: .25rem; 
-  color: var(--ink); /* Teks hitam/gelap */
+  color: var(--ink); 
   transition: .2s; 
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
 }
+
 .admin-nav-item:hover { 
   background: rgba(0, 0, 0, 0.08); 
   color: var(--ink); 
@@ -286,15 +288,17 @@ body{ background: var(--paper); color: var(--ink); }
 
 .admin-nav-item.active { 
   background: #7a9c8c; 
-  color: #fff; /* Teks menu aktif tetap putih agar kontras */
+  color: #fff; 
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1); 
 }
+
 .admin-nav-icon{ width:1.75rem; text-align:center; font-size:1.15rem; }
-.admin-sidebar-footer{ border-color:rgba(255,255,255,.1); }
-.admin-main{ margin-left:250px; padding:1.875rem 2.2rem 3.125rem; }
+.admin-sidebar-footer{ border-color:rgba(0, 0, 0, 0.1); }
+
+.admin-main{ padding:1.875rem 2.2rem 3.125rem; }
 .admin-topbar{ display:flex; justify-content:space-between; align-items:center; gap:1rem; flex-wrap:wrap; margin-bottom:1.75rem; padding-bottom:1rem; border-bottom:2px solid #e8ddd0; }
 .admin-eyebrow {
-  color: #95b4a4; /* <-- Ubah dari var(--gold) ke #95b4a4 */
+  color: #95b4a4;
   font-size: .7rem;
   font-weight: 700;
   letter-spacing: .12em;
@@ -309,11 +313,12 @@ body{ background: var(--paper); color: var(--ink); }
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: #95b4a4; /* <-- Ubah dari var(--gold) ke #95b4a4 */
+  background: #95b4a4;
   color: #fff;
   font-size: 1.125rem;
   font-weight: 700;
 }
+
 .admin-main h1, .admin-main h2, .admin-main h3{ color:var(--ink); }
 .admin-main > div > h1, .admin-main > div > h2{ font-weight:800; }
 .admin-main .bg-white{ background:#fffcf7; }
@@ -324,25 +329,16 @@ body{ background: var(--paper); color: var(--ink); }
 .admin-main .field input, .admin-main .field select, .admin-main .field textarea{ border-radius:.75rem; background:#fffcf7; }
 .admin-main button, .admin-main a{ transition:.2s; }
 
-@media (max-width:1024px){
-  .admin-sidebar{ width:220px; padding:1.25rem .875rem; }
-  .admin-main{ margin-left:220px; padding:1.25rem; }
+/* MEDIA QUERIES RESPONSIVE (DIPERBARUI) */
+@media (max-width: 768px) {
+  /* Hapus margin-left desktop agar konten utama tidak terdorong di HP */
+  .admin-main { 
+    margin-left: 0 !important; 
+    padding: 1rem; 
+  }
 }
 
-@media (max-width:768px){
-  .admin-sidebar{ width:70px; padding:1rem .625rem; }
-  .admin-logo{ font-size:1rem; text-align:center; padding-left:0; padding-right:0; }
-  .admin-logo span{ display:block; }
-  .admin-menu-label, .admin-sidebar-footer p, .admin-sidebar-footer a, .admin-sidebar-footer button{ display:none; }
-  .admin-sidebar-footer{ padding-top:0; border-top:0; }
-  .admin-nav-item{ justify-content:center; padding:.625rem .5rem; font-size:0; }
-  .admin-nav-icon{ width:auto; font-size:1.375rem; }
-  .admin-main{ margin-left:70px; padding:1rem; }
-  .admin-topbar-title{ font-size:1rem; }
-  .admin-user span:first-child{ display:none; }
-}
-
-@media (max-width:480px){
-  .admin-topbar{ margin-bottom:1.25rem; }
-  .admin-main h1{ font-size:1.5rem; }
+@media (max-width: 480px) {
+  .admin-topbar { margin-bottom: 1.25rem; }
+  .admin-main h1 { font-size: 1.5rem; }
 }

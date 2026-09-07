@@ -1,18 +1,9 @@
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { updateOrderStatus } from "../actions";
+import StatusSelect from "@/components/StatusSelect";
 
-// Pemformat angka yang aman dari NaN / undefined / null
 const fmt = (n) => "Rp" + Math.round(Number(n) || 0).toLocaleString("id-ID");
-
-const STATUSES = ["pending", "diproses", "dikirim", "selesai", "dibatalkan"];
-const STATUS_LABEL = {
-  pending: "Menunggu Konfirmasi",
-  diproses: "Diproses",
-  dikirim: "Dikirim",
-  selesai: "Selesai",
-  dibatalkan: "Dibatalkan",
-};
 
 export default async function OrderDetailPage({ params, searchParams }) {
   const supabase = createClient();
@@ -26,7 +17,6 @@ export default async function OrderDetailPage({ params, searchParams }) {
 
   if (!order) notFound();
 
-  // Amankan nilai ongkir & total
   const shippingCost = Number(order.shipping_cost) || 0;
   const totalAmount = Number(order.total_amount) || 0;
 
@@ -47,30 +37,17 @@ export default async function OrderDetailPage({ params, searchParams }) {
         </p>
       )}
 
-      <div className="flex items-center justify-between flex-wrap gap-3 mt-3 mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mt-3 mb-6">
         <h1 className="font-display text-2xl sm:text-3xl font-semibold">
           {order.order_number || `Order #${order.id.slice(0, 8)}`}
         </h1>
-        <form action={updateOrderStatus} className="flex items-center gap-2">
-          <input type="hidden" name="id" value={order.id} />
-          <select
-            name="status"
-            defaultValue={order.status}
-            className="border border-[var(--line)] rounded-sm px-3 py-2 text-sm bg-white"
-          >
-            {STATUSES.map((s) => (
-              <option key={s} value={s}>
-                {STATUS_LABEL[s]}
-              </option>
-            ))}
-          </select>
-          <button
-            type="submit"
-            className="bg-plum text-white text-sm font-medium px-4 py-2 rounded-sm"
-          >
-            Update
-          </button>
-        </form>
+
+        {/* Penggunaan Custom Dropdown */}
+        <StatusSelect
+          orderId={order.id}
+          currentStatus={order.status}
+          updateOrderStatus={updateOrderStatus}
+        />
       </div>
 
       <div className="bg-white border border-[var(--line)] rounded-sm p-5 mb-5">
