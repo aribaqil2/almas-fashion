@@ -96,11 +96,10 @@ export default async function KategoriPage({ searchParams }) {
             return (
               <div key={parent.id} className="bg-white">
                 {/* BARIS KATEGORI UTAMA */}
-                <form action={updateCategory} className="p-3 sm:p-4 grid grid-cols-12 items-center bg-gray-50/70 border-b border-gray-100">
-                  <input type="hidden" name="id" value={parent.id} />
-                  
+                <div className="p-3 sm:p-4 grid grid-cols-12 items-center bg-gray-50/70 border-b border-gray-100">
                   <div className="col-span-5 sm:col-span-4 pr-2">
                     <input 
+                      form={`update-${parent.id}`}
                       name="name" 
                       defaultValue={parent.name} 
                       className="border border-[var(--line)] rounded-sm px-2.5 py-1.5 text-sm font-semibold w-full bg-white" 
@@ -110,11 +109,15 @@ export default async function KategoriPage({ searchParams }) {
                   <span className="col-span-3 sm:col-span-3 text-xs text-ink/50">{parent.slug}</span>
                   <span className="col-span-2 sm:col-span-2 text-xs font-semibold">{countFor(parent.id)}</span>
                   
-                  {/* AKSI: SIMPAN & HAPUS */}
+                  {/* AKSI: SIMPAN & HAPUS BERADA DI KOLOM PALING KANAN */}
                   <div className="col-span-2 sm:col-span-3 flex items-center justify-end gap-2">
-                    <button type="submit" className="bg-plum text-white px-3 py-1.5 rounded-sm text-xs font-medium hover:opacity-90">
-                      Simpan
-                    </button>
+                    <form id={`update-${parent.id}`} action={updateCategory} className="inline">
+                      <input type="hidden" name="id" value={parent.id} />
+                      <button type="submit" className="bg-plum text-white px-3 py-1.5 rounded-sm text-xs font-medium hover:opacity-90">
+                        Simpan
+                      </button>
+                    </form>
+
                     <form action={deleteCategory} className="inline">
                       <input type="hidden" name="id" value={parent.id} />
                       <ConfirmSubmitButton 
@@ -125,16 +128,15 @@ export default async function KategoriPage({ searchParams }) {
                       </ConfirmSubmitButton>
                     </form>
                   </div>
-                </form>
+                </div>
 
                 {/* BARIS SUB-KATEGORI */}
                 {subCategories.map((sub) => (
-                  <form key={sub.id} action={updateCategory} className="p-3 pl-6 sm:pl-10 grid grid-cols-12 items-center border-t border-gray-100 text-sm hover:bg-gray-50/30">
-                    <input type="hidden" name="id" value={sub.id} />
-                    
+                  <div key={sub.id} className="p-3 pl-6 sm:pl-10 grid grid-cols-12 items-center border-t border-gray-100 text-sm hover:bg-gray-50/30">
                     <div className="col-span-5 sm:col-span-4 flex items-center gap-2 pr-2">
                       <span className="text-ink/30 select-none">└</span>
                       <input 
+                        form={`update-${sub.id}`}
                         name="name" 
                         defaultValue={sub.name} 
                         className="border border-[var(--line)] rounded-sm px-2 py-1 text-sm w-full bg-white" 
@@ -142,6 +144,7 @@ export default async function KategoriPage({ searchParams }) {
 
                       {/* Dropdown Induk */}
                       <select 
+                        form={`update-${sub.id}`}
                         name="parent_id" 
                         defaultValue={sub.parent_id} 
                         className="border border-[var(--line)] rounded-sm px-1.5 py-1 text-xs bg-white hidden sm:block w-36"
@@ -155,11 +158,15 @@ export default async function KategoriPage({ searchParams }) {
                     <span className="col-span-3 sm:col-span-3 text-xs text-ink/50">{sub.slug}</span>
                     <span className="col-span-2 sm:col-span-2 text-xs">{countFor(sub.id)}</span>
                     
-                    {/* AKSI: SIMPAN & HAPUS */}
+                    {/* AKSI: SIMPAN & HAPUS BERADA DI KOLOM PALING KANAN */}
                     <div className="col-span-2 sm:col-span-3 flex items-center justify-end gap-2">
-                      <button type="submit" className="bg-plum text-white px-3 py-1 rounded-sm text-xs font-medium hover:opacity-90">
-                        Simpan
-                      </button>
+                      <form id={`update-${sub.id}`} action={updateCategory} className="inline">
+                        <input type="hidden" name="id" value={sub.id} />
+                        <button type="submit" className="bg-plum text-white px-3 py-1 rounded-sm text-xs font-medium hover:opacity-90">
+                          Simpan
+                        </button>
+                      </form>
+
                       <form action={deleteCategory} className="inline">
                         <input type="hidden" name="id" value={sub.id} />
                         <ConfirmSubmitButton 
@@ -170,7 +177,7 @@ export default async function KategoriPage({ searchParams }) {
                         </ConfirmSubmitButton>
                       </form>
                     </div>
-                  </form>
+                  </div>
                 ))}
               </div>
             );
