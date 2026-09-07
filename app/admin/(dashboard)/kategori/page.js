@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { createCategory, renameCategory, deleteCategory } from "./actions";
+import { createParentCategory, createSubCategory, updateCategory, deleteCategory } from "./actions";
 import ConfirmSubmitButton from "@/components/ConfirmSubmitButton";
 
 export default async function KategoriPage({ searchParams }) {
@@ -8,90 +8,178 @@ export default async function KategoriPage({ searchParams }) {
   const { data: products } = await supabase.from("products").select("category_id");
 
   const list = categories || [];
+  const parentCategories = list.filter((c) => !c.parent_id);
   const countFor = (id) => (products || []).filter((p) => p.category_id === id).length;
 
   return (
-    <div>
-      <h1 className="font-display text-2xl sm:text-3xl font-semibold mb-6">Kategori</h1>
+    <div className="space-y-6">
+      <h1 className="font-display text-2xl sm:text-3xl font-semibold">Kelola Kategori & Sub-Kategori</h1>
 
-      {searchParams.error && (
-        <p className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-sm px-3 py-2 mb-5">{searchParams.error}</p>
+      {searchParams?.error && (
+        <p className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-sm px-3 py-2">{searchParams.error}</p>
       )}
-      {searchParams.success && (
-        <p className="text-sm text-green-700 bg-green-50 border border-green-200 rounded-sm px-3 py-2 mb-5">{searchParams.success}</p>
+      {searchParams?.success && (
+        <p className="text-sm text-green-700 bg-green-50 border border-green-200 rounded-sm px-3 py-2">{searchParams.success}</p>
       )}
 
-      {/* Form Tambah Kategori Baru */}
-      <form action={createCategory} className="flex flex-col sm:flex-row items-stretch sm:items-end gap-3 mb-6 bg-white border border-[var(--line)] rounded-sm p-4 sm:p-5">
-        <div className="field flex-1">
-          <label>Nama kategori baru</label>
-          <input name="name" type="text" placeholder="mis. Loungewear" required />
-        </div>
-        <button type="submit" className="bg-plum text-white text-sm font-medium px-4 py-2.5 rounded-sm self-end w-full sm:w-auto">+ Tambah Kategori</button>
-      </form>
+      {/* BOX INPUT */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* FORM 1: INPUT KATEGORI UTAMA */}
+        <form action={createParentCategory} className="bg-white border border-[var(--line)] rounded-sm p-4 sm:p-5 flex flex-col justify-between gap-3">
+          <div>
+            <h2 className="font-medium text-sm text-ink mb-1">1. Tambah Kategori Utama</h2>
+            <p className="text-xs text-ink/50 mb-3">Kategori tingkat atas (mis. Koleksi Batik Pria, Koleksi Wanita)</p>
+            
+            <input 
+              name="name" 
+              type="text" 
+              placeholder="mis. Koleksi Batik Pria" 
+              required 
+              className="border border-[var(--line)] rounded-sm px-3 py-2 text-sm w-full" 
+            />
+          </div>
 
-      {/* 1. TAMPILAN MOBILE: KARTU */}
-      <div className="grid grid-cols-1 gap-3 md:hidden">
-        {list.map((c) => (
-          <div key={c.id} className="bg-white border border-[var(--line)] rounded-sm p-4 flex flex-col gap-3">
-            <form action={renameCategory} className="flex items-center gap-2">
-              <input type="hidden" name="id" value={c.id} />
-              <input name="name" defaultValue={c.name} className="border border-[var(--line)] rounded-sm px-3 py-1.5 text-sm flex-1" />
-              <button type="submit" className="text-xs bg-plum text-white px-3 py-1.5 rounded-sm">Simpan</button>
-            </form>
+          <button type="submit" className="bg-plum text-white text-sm font-medium px-4 py-2 rounded-sm self-start hover:opacity-90 transition">
+            Simpan Kategori Utama
+          </button>
+        </form>
 
-            <div className="flex items-center justify-between pt-2 border-t border-[var(--line)] text-xs text-ink/50">
-              <span>Slug: <strong className="text-ink">{c.slug}</strong></span>
-              <span>Produk: <strong className="text-ink">{countFor(c.id)}</strong></span>
-            </div>
+        {/* FORM 2: INPUT SUB-KATEGORI */}
+        <form action={createSubCategory} className="bg-white border border-[var(--line)] rounded-sm p-4 sm:p-5 flex flex-col justify-between gap-3">
+          <div>
+            <h2 className="font-medium text-sm text-ink mb-1">2. Tambah Sub-Kategori</h2>
+            <p className="text-xs text-ink/50 mb-3">Turunan yang masuk ke dalam kategori utama</p>
 
-            <div className="text-right pt-1">
-              <form action={deleteCategory}>
-                <input type="hidden" name="id" value={c.id} />
-                <ConfirmSubmitButton message={`Hapus kategori "${c.name}"?`} className="text-xs underline text-red-700 font-medium">
-                  Hapus Kategori
-                </ConfirmSubmitButton>
-              </form>
+            <div className="space-y-2">
+              <select name="parent_id" required className="border border-[var(--line)] rounded-sm px-3 py-2 text-sm bg-white w-full">
+                <option value="">-- Pilih Kategori Utama --</option>
+                {parentCategories.map((parent) => (
+                  <option key={parent.id} value={parent.id}>
+                    {parent.name}
+                  </option>
+                ))}
+              </select>
+
+              <input 
+                name="name" 
+                type="text" 
+                placeholder="mis. Kemeja Pria Lengan Panjang" 
+                required 
+                className="border border-[var(--line)] rounded-sm px-3 py-2 text-sm w-full" 
+              />
             </div>
           </div>
-        ))}
+
+          <button 
+            type="submit" 
+            disabled={parentCategories.length === 0}
+            className="bg-plum text-white text-sm font-medium px-4 py-2 rounded-sm self-start hover:opacity-90 transition disabled:opacity-50"
+          >
+            Simpan Sub-Kategori
+          </button>
+        </form>
       </div>
 
-      {/* 2. TAMPILAN DESKTOP: TABEL */}
-      <div className="hidden md:block bg-white border border-[var(--line)] rounded-sm overflow-x-auto">
-        <table className="admin-table w-full text-sm">
-          <thead>
-            <tr className="text-left text-xs uppercase tracking-wide text-ink/50">
-              <th className="py-3 px-4">Nama</th>
-              <th className="py-3 px-4">Slug</th>
-              <th className="py-3 px-4">Jumlah Produk</th>
-              <th className="py-3 px-4"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {list.map((c) => (
-              <tr key={c.id}>
-                <td className="py-2.5 px-4">
-                  <form action={renameCategory} className="flex items-center gap-2">
-                    <input type="hidden" name="id" value={c.id} />
-                    <input name="name" defaultValue={c.name} className="border border-[var(--line)] rounded-sm px-2.5 py-1.5 text-sm w-40" />
-                    <button type="submit" className="text-xs underline text-plum">Simpan</button>
+      {/* TABEL LIST & EDIT */}
+      <div className="bg-white border border-[var(--line)] rounded-sm overflow-hidden">
+        <div className="p-4 bg-gray-50 border-b border-[var(--line)] text-xs uppercase tracking-wide text-ink/50 font-semibold grid grid-cols-12 items-center">
+          <span className="col-span-5 sm:col-span-4">Nama Struktur</span>
+          <span className="col-span-3 sm:col-span-3">Slug</span>
+          <span className="col-span-2 sm:col-span-2">Jumlah Produk</span>
+          <span className="col-span-2 sm:col-span-3 text-right">Aksi</span>
+        </div>
+
+        <div className="divide-y divide-[var(--line)]">
+          {parentCategories.map((parent) => {
+            const subCategories = list.filter((sub) => sub.parent_id === parent.id);
+
+            return (
+              <div key={parent.id} className="bg-white">
+                {/* BARIS KATEGORI UTAMA */}
+                <form action={updateCategory} className="p-3 sm:p-4 grid grid-cols-12 items-center bg-gray-50/70 border-b border-gray-100">
+                  <input type="hidden" name="id" value={parent.id} />
+                  
+                  <div className="col-span-5 sm:col-span-4 pr-2">
+                    <input 
+                      name="name" 
+                      defaultValue={parent.name} 
+                      className="border border-[var(--line)] rounded-sm px-2.5 py-1.5 text-sm font-semibold w-full bg-white" 
+                    />
+                  </div>
+
+                  <span className="col-span-3 sm:col-span-3 text-xs text-ink/50">{parent.slug}</span>
+                  <span className="col-span-2 sm:col-span-2 text-xs font-semibold">{countFor(parent.id)}</span>
+                  
+                  {/* AKSI: SIMPAN & HAPUS */}
+                  <div className="col-span-2 sm:col-span-3 flex items-center justify-end gap-2">
+                    <button type="submit" className="bg-plum text-white px-3 py-1.5 rounded-sm text-xs font-medium hover:opacity-90">
+                      Simpan
+                    </button>
+                    <form action={deleteCategory} className="inline">
+                      <input type="hidden" name="id" value={parent.id} />
+                      <ConfirmSubmitButton 
+                        message={`Hapus kategori utama "${parent.name}"?`} 
+                        className="border border-red-300 bg-red-50 text-red-700 hover:bg-red-100 px-3 py-1.5 rounded-sm text-xs font-medium"
+                      >
+                        Hapus
+                      </ConfirmSubmitButton>
+                    </form>
+                  </div>
+                </form>
+
+                {/* BARIS SUB-KATEGORI */}
+                {subCategories.map((sub) => (
+                  <form key={sub.id} action={updateCategory} className="p-3 pl-6 sm:pl-10 grid grid-cols-12 items-center border-t border-gray-100 text-sm hover:bg-gray-50/30">
+                    <input type="hidden" name="id" value={sub.id} />
+                    
+                    <div className="col-span-5 sm:col-span-4 flex items-center gap-2 pr-2">
+                      <span className="text-ink/30 select-none">└</span>
+                      <input 
+                        name="name" 
+                        defaultValue={sub.name} 
+                        className="border border-[var(--line)] rounded-sm px-2 py-1 text-sm w-full bg-white" 
+                      />
+
+                      {/* Dropdown Induk */}
+                      <select 
+                        name="parent_id" 
+                        defaultValue={sub.parent_id} 
+                        className="border border-[var(--line)] rounded-sm px-1.5 py-1 text-xs bg-white hidden sm:block w-36"
+                      >
+                        {parentCategories.map((p) => (
+                          <option key={p.id} value={p.id}>{p.name}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <span className="col-span-3 sm:col-span-3 text-xs text-ink/50">{sub.slug}</span>
+                    <span className="col-span-2 sm:col-span-2 text-xs">{countFor(sub.id)}</span>
+                    
+                    {/* AKSI: SIMPAN & HAPUS */}
+                    <div className="col-span-2 sm:col-span-3 flex items-center justify-end gap-2">
+                      <button type="submit" className="bg-plum text-white px-3 py-1 rounded-sm text-xs font-medium hover:opacity-90">
+                        Simpan
+                      </button>
+                      <form action={deleteCategory} className="inline">
+                        <input type="hidden" name="id" value={sub.id} />
+                        <ConfirmSubmitButton 
+                          message={`Hapus sub-kategori "${sub.name}"?`} 
+                          className="border border-red-300 bg-red-50 text-red-700 hover:bg-red-100 px-3 py-1 rounded-sm text-xs font-medium"
+                        >
+                          Hapus
+                        </ConfirmSubmitButton>
+                      </form>
+                    </div>
                   </form>
-                </td>
-                <td className="py-2.5 px-4 text-ink/50">{c.slug}</td>
-                <td className="py-2.5 px-4">{countFor(c.id)}</td>
-                <td className="py-2.5 px-4 text-right">
-                  <form action={deleteCategory}>
-                    <input type="hidden" name="id" value={c.id} />
-                    <ConfirmSubmitButton message={`Hapus kategori "${c.name}"?`} className="text-xs underline text-red-700">
-                      Hapus
-                    </ConfirmSubmitButton>
-                  </form>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                ))}
+              </div>
+            );
+          })}
+
+          {parentCategories.length === 0 && (
+            <div className="p-8 text-center text-ink/50 text-sm">Belum ada kategori utama. Tambahkan di atas terlebih dahulu.</div>
+          )}
+        </div>
       </div>
     </div>
   );

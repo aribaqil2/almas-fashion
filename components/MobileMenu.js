@@ -3,13 +3,15 @@
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 
-export default function MobileMenu({ categories }) {
+export default function MobileMenu({ categories = [] }) {
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  const mainCategories = categories.filter((c) => !c.parent_id);
 
   return (
     <>
@@ -51,16 +53,45 @@ export default function MobileMenu({ categories }) {
             </h2>
 
             <div className="flex flex-col">
-              {categories.map((c) => (
-                <a 
-                  key={c.id} 
-                  href={`/?kategori=${c.slug}`} 
-                  onClick={() => setOpen(false)}
-                  className="py-3 border-b border-[var(--line)] text-sm font-medium hover:text-plum transition-colors"
-                >
-                  {c.name}
-                </a>
-              ))}
+              <a 
+                href="/" 
+                onClick={() => setOpen(false)}
+                className="py-3 border-b border-[var(--line)] text-sm font-medium hover:text-plum transition-colors"
+              >
+                Home
+              </a>
+
+              {mainCategories.map((parent) => {
+                const subCategories = categories.filter((sub) => sub.parent_id === parent.id);
+
+                return (
+                  <div key={parent.id} className="border-b border-[var(--line)] py-2 flex flex-col">
+                    <a 
+                      href={`/?kategori=${parent.slug}`} 
+                      onClick={() => setOpen(false)}
+                      className="py-1 text-sm font-medium hover:text-plum transition-colors"
+                    >
+                      {parent.name}
+                    </a>
+
+                    {/* Sub Kategori di Tampilan Mobile */}
+                    {subCategories.length > 0 && (
+                      <div className="pl-4 mt-1 flex flex-col gap-1 border-l-2 border-[var(--line)] ml-1">
+                        {subCategories.map((sub) => (
+                          <a
+                            key={sub.id}
+                            href={`/?kategori=${sub.slug}`}
+                            onClick={() => setOpen(false)}
+                            className="py-1 text-xs text-ink/70 hover:text-plum transition-colors"
+                          >
+                            ↳ {sub.name}
+                          </a>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </nav>
         </div>,

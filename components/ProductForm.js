@@ -20,7 +20,7 @@ function SubmitButton({ uploading }) {
   );
 }
 
-export default function ProductForm({ action, categories, product }) {
+export default function ProductForm({ action, categories = [], product }) {
   const [state, formAction] = useFormState(action, {});
   const [selectedSizes, setSelectedSizes] = useState(product?.sizes || ["S", "M", "L"]);
   const initialStockBySize = product?.stock_by_size && Object.keys(product.stock_by_size).length
@@ -31,6 +31,23 @@ export default function ProductForm({ action, categories, product }) {
   const [stockBySize, setStockBySize] = useState(initialStockBySize);
   const [imageUrl, setImageUrl] = useState(product?.image_url || "");
   const [uploading, setUploading] = useState(false);
+
+  // --- LOGIKA KATEGORI BERTINGKAT ---
+  const mainCategories = categories.filter((c) => !c.parent_id);
+  
+  // Tentukan parent & sub awal saat halaman/produk dimuat
+  const currentCategory = categories.find((c) => c.id === product?.category_id);
+  const initialParentId = currentCategory?.parent_id || (currentCategory ? currentCategory.id : "");
+  const initialSubId = currentCategory?.parent_id ? currentCategory.id : "";
+
+  const [selectedParentId, setSelectedParentId] = useState(initialParentId);
+  const [selectedSubId, setSelectedSubId] = useState(initialSubId);
+
+  // Daftar sub-kategori berdasarkan parent yang dipilih
+  const subCategoryOptions = categories.filter((c) => c.parent_id === selectedParentId);
+
+  // ID Kategori final yang dikirim ke backend
+  const finalCategoryId = selectedSubId || selectedParentId;
 
   function toggleSize(s) {
     setSelectedSizes((prev) => {
@@ -73,9 +90,10 @@ export default function ProductForm({ action, categories, product }) {
     <form action={formAction} className="bg-white border border-[var(--line)] rounded-sm p-6 max-w-2xl">
       {state?.error && <p className="text-sm text-red-700 bg-red-50 rounded-sm px-3 py-2 mb-4">{state.error}</p>}
 
-      {/* Input hidden untuk membawa URL gambar ke Server Action */}
+      {/* Input hidden untuk membawa URL gambar, stok per ukuran, dan ID kategori terpilih */}
       <input type="hidden" name="image_url" value={imageUrl} />
       <input type="hidden" name="stock_by_size" value={JSON.stringify(stockBySize)} />
+      <input type="hidden" name="category_id" value={finalCategoryId} />
 
       <div className="grid sm:grid-cols-2 gap-4">
         {/* Input Gambar Produk */}
@@ -105,14 +123,45 @@ export default function ProductForm({ action, categories, product }) {
           <label>Deskripsi produk</label>
           <textarea name="description" rows="5" defaultValue={product?.description || ""} placeholder="Jelaskan bahan, model, ukuran, dan cara perawatan produk." />
         </div>
+
+        {/* DROPDOWN KATEGORI BERTINGKAT */}
         <div className="field">
-          <label>Kategori</label>
-          <select name="category_id" defaultValue={product?.category_id} required>
-            {categories.map((c) => (
-              <option key={c.id} value={c.id}>{c.name}</option>
+          <label>Kategori Utama</label>
+          <select
+            value={selectedParentId}
+            onChange={(e) => {
+              setSelectedParentId(e.target.value);
+              setSelectedSubId(""); // Reset sub-kategori ketika parent berganti
+            }}
+            required
+          >
+            <option value="">-- Pilih Kategori Utama --</option>
+            {mainCategories.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
             ))}
           </select>
         </div>
+
+        <div className="field">
+          <label>Sub-Kategori</label>
+          <select
+            value={selectedSubId}
+            onChange={(e) => setSelectedSubId(e.target.value)}
+            disabled={subCategoryOptions.length === 0}
+          >
+            <option value="">
+              {subCategoryOptions.length > 0 ? "-- Pilih Sub-Kategori --" : "Tidak ada sub-kategori"}
+            </option>
+            {subCategoryOptions.map((sub) => (
+              <option key={sub.id} value={sub.id}>
+                {sub.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
         <div className="field">
           <label>Status</label>
           <select name="status" defaultValue={product?.status || "active"}>
