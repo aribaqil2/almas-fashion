@@ -48,7 +48,7 @@ export default async function StorefrontPage({ searchParams }) {
   if (categoryIdsToFilter.length > 0) {
     query = query.in("category_id", categoryIdsToFilter);
   }
-  
+
   if (colors.length) query = query.in("color", colors);
   if (motifs.length) query = query.in("motif", motifs);
   if (q) query = query.ilike("name", `%${q}%`);
@@ -127,7 +127,13 @@ export default async function StorefrontPage({ searchParams }) {
               <p>Temukan koleksi blouse, dress, dan outerwear terbaru dari Almas Fashion. Nyaman, stylish, dan berkualitas premium.</p>
               <a href="#produk-terbaru" className="home-hero-button">Belanja Sekarang <span aria-hidden="true">→</span></a>
             </div>
-            <div className="home-hero-art" aria-hidden="true">👗</div>
+            <div className="home-hero-art flex items-center justify-center">
+              <img
+                src="/logo.jpeg"
+                alt="Almas Fashion & Boutique Logo"
+                className="w-full max-w-md h-auto object-contain rounded-2xl"
+              />
+            </div>
           </section>
 
           <section id="produk-terbaru" className="home-section">

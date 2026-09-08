@@ -64,19 +64,26 @@ export default function MobileMenu({ categories = [] }) {
               {mainCategories.map((parent) => {
                 const subCategories = categories.filter((sub) => sub.parent_id === parent.id);
 
-                return (
-                  <div key={parent.id} className="border-b border-[var(--line)] py-2 flex flex-col">
-                    <a 
-                      href={`/?kategori=${parent.slug}`} 
-                      onClick={() => setOpen(false)}
-                      className="py-1 text-sm font-medium hover:text-plum transition-colors"
-                    >
-                      {parent.name}
-                    </a>
+                // Jika punya sub-kategori, klik di mana saja (teks / panah) akan membuka dropdown
+                if (subCategories.length > 0) {
+                  return (
+                    <details key={parent.id} className="group border-b border-[var(--line)] py-2">
+                      <summary className="flex justify-between items-center cursor-pointer text-sm font-medium py-1 list-none hover:text-plum transition-colors select-none">
+                        <span>{parent.name}</span>
+                        <span className="text-xs transition-transform group-open:rotate-180 text-ink/50 ml-2">
+                          ▼
+                        </span>
+                      </summary>
 
-                    {/* Sub Kategori di Tampilan Mobile */}
-                    {subCategories.length > 0 && (
-                      <div className="pl-4 mt-1 flex flex-col gap-1 border-l-2 border-[var(--line)] ml-1">
+                      {/* Sub Kategori */}
+                      <div className="pl-3 mt-1 flex flex-col gap-1 border-l-2 border-[var(--line)] ml-1 pb-1">
+                        <a
+                          href={`/?kategori=${parent.slug}`}
+                          onClick={() => setOpen(false)}
+                          className="py-1 text-xs font-semibold text-plum hover:underline"
+                        >
+                          Lihat Semua {parent.name}
+                        </a>
                         {subCategories.map((sub) => (
                           <a
                             key={sub.id}
@@ -88,8 +95,20 @@ export default function MobileMenu({ categories = [] }) {
                           </a>
                         ))}
                       </div>
-                    )}
-                  </div>
+                    </details>
+                  );
+                }
+
+                // Jika tidak punya sub-kategori, langsung berfungsi sebagai link biasa
+                return (
+                  <a 
+                    key={parent.id}
+                    href={`/?kategori=${parent.slug}`}
+                    onClick={() => setOpen(false)}
+                    className="border-b border-[var(--line)] py-3 text-sm font-medium hover:text-plum transition-colors"
+                  >
+                    {parent.name}
+                  </a>
                 );
               })}
             </div>
